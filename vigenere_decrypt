@@ -1,0 +1,90 @@
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+#include<ctype.h>
+#define MAXN 1024
+
+char * vigenere_decrypt(char* cipher, char * key){
+    int text_length = strlen(cipher);
+    int key_length = strlen(key);
+
+    char * plaintext = (char*)malloc(sizeof(char) * (text_length+1));
+    memset(plaintext, '\0', sizeof(char) * (text_length+1));
+    int shift = 0;
+    char * key_ptr = key;
+    for(int i = 0; i<text_length; i++){
+        if(isalpha(cipher[i])){
+            int shift = tolower(*key_ptr) - 'a';
+            if(islower(cipher[i])){
+                plaintext[i] = 'a' + (cipher[i] - 'a' - shift + 26) %26;
+            }
+            else{
+                plaintext[i] = 'A' + (cipher[i] - 'A' - shift + 26) %26;
+            }
+            key_ptr++;
+            if(*key_ptr == '\0')
+                key_ptr=key;
+        }
+        else{
+            plaintext[i] = cipher[i];
+        }
+    }
+    plaintext[text_length] = '\0';
+    return plaintext;
+}
+
+const char* read_filename_stdin() {
+    static char filename[1024];  // Static to keep the buffer after returning
+    printf("Enter filename: ");
+    fgets(filename, sizeof(filename), stdin);
+    filename[strcspn(filename, "\n")] = '\0';  // Remove newline character
+    return filename;
+}
+
+void read_input_file(const char *filename, char *buffer) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "Error opening file %s for reading\n", filename);
+        exit(EXIT_FAILURE);  // Exit if the file can't be opened
+    }
+    size_t length = fread(buffer, sizeof(char), 1024, file);  // Read up to 1024 characters (adjust as needed)
+    buffer[length] = '\0';  // Null-terminate the string
+    fclose(file);
+}
+
+// Function to write content to a file
+void write_text(const char *filename, const char *text) {
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+        fprintf(stderr, "Error opening file %s for writing\n", filename);
+        exit(EXIT_FAILURE);  // Exit if the file can't be opened
+    }
+    fprintf(file, "%s", text);  // Write the text to the file
+    fclose(file);
+}
+
+
+
+int main(){
+    
+    char cipher[MAXN];
+    char key[MAXN];
+
+    //scanf("%s",text);
+    read_input_file(read_filename_stdin(), cipher);
+    read_input_file(read_filename_stdin(), key);
+
+    //scanf("%s",key);
+
+    char * text = vigenere_decrypt(cipher ,key);
+    puts(text);
+    write_text("vigenere_cypher.txt", text);
+
+    free(text);
+
+    return EXIT_SUCCESS;
+
+    
+
+
+}
